@@ -1,8 +1,6 @@
 package ueberzug
 
 import (
-	"time"
-
 	"github.com/BurntSushi/xgb"
 	"github.com/BurntSushi/xgb/xproto"
 	"github.com/BurntSushi/xgbutil"
@@ -47,21 +45,29 @@ func init() {
 
 	parent.Geometry()
 
-	g, err := xwindow.Create(xutil, xgb.RootWin())
+	w, err := xwindow.Generate(xutil)
 	if err != nil {
 		panic(err)
 	}
 
-	child = g
-	child.Create(
-		child.Id,
-		0, 0, 200, 200,
-		xproto.CwBackPixel, 0xffffff,
-	)
+	if err := w.CreateChecked(
+		xgb.RootWin(),
+		parent.Geom.X(),
+		parent.Geom.Y(),
+		parent.Geom.Width(),
+		parent.Geom.Height(),
+		xproto.CwOverrideRedirect, 1,
+	); err != nil {
+		panic(err)
+	}
 
-	child.Map()
+	if err := xproto.ReparentWindowChecked(
+		x, w.Id, parent.Id, 0, 0,
+	).Check(); err != nil {
+		panic(err)
+	}
 
-	time.Sleep(8 * time.Second)
+	child = w
 
 	// Listen to resizes on the parent
 	parent.Listen(xproto.EventMaskSubstructureRedirect)
