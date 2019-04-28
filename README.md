@@ -8,3 +8,9 @@ A simple half-assed port of ueberzug to Golang, aimed to replace w3m.
 
 Refer to `ueberzug_test.go`
 
+## Todo
+
+- [ ] Handle soft translations 
+- [ ] Alpha channels, maybe
+- [ ] tview primitive
+- [ ] Add more New* functions
