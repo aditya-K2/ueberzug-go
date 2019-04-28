@@ -6,7 +6,6 @@ import (
 	"github.com/BurntSushi/xgbutil"
 	"github.com/BurntSushi/xgbutil/xevent"
 	"github.com/BurntSushi/xgbutil/xwindow"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/k0kubun/pp"
 )
 
@@ -50,9 +49,8 @@ func init() {
 		panic(err)
 	}
 
-	if err := g.CreateChecked(g.Id, 0, 0, 1, 1, 0); err != nil {
+	if err := g.CreateChecked(parent.Id, 0, 0, 1, 1, 0); err != nil {
 		pp.Print(err)
-		spew.Dump(err)
 		panic(err)
 	}
 
@@ -63,7 +61,7 @@ func init() {
 		parent.Geom.Y(),
 		parent.Geom.Width(),
 		parent.Geom.Height(),
-		xproto.CwBackPixel, 0xffffffff,
+		xproto.CwBackPixel, 0xffffff,
 	)
 
 	child.Map()
