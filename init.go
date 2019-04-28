@@ -4,26 +4,22 @@ import (
 	"github.com/BurntSushi/xgb"
 	"github.com/BurntSushi/xgb/xproto"
 	"github.com/BurntSushi/xgbutil"
-	"github.com/BurntSushi/xgbutil/xevent"
 	"github.com/BurntSushi/xgbutil/xwindow"
 )
 
 var (
-	// X is the active X connection, initialized on
-	// application start, init()
-	X      *xgb.Conn
+	x      *xgb.Conn
 	xutil  *xgbutil.XUtil
 	parent *xwindow.Window
-	child  *xwindow.Window
 )
 
 func init() {
-	x, err := xgb.NewConnDisplay(":0")
+	c, err := xgb.NewConn()
 	if err != nil {
 		panic(err)
 	}
 
-	X = x
+	x = c
 
 	x.Sync()
 
@@ -43,46 +39,29 @@ func init() {
 		xgb, mustGetActiveWindow(root),
 	)
 
-	parent.Geometry()
+	/*
+		parent.Geometry()
 
-	w, err := xwindow.Generate(xutil)
-	if err != nil {
-		panic(err)
-	}
+		// Listen to resizes on the parent
+		parent.Listen(xproto.EventMaskSubstructureRedirect)
 
-	if err := w.CreateChecked(
-		xgb.RootWin(),
-		parent.Geom.X(),
-		parent.Geom.Y(),
-		parent.Geom.Width(),
-		parent.Geom.Height(),
-		xproto.CwOverrideRedirect, 1,
-	); err != nil {
-		panic(err)
-	}
+		// Callback to resize events
+		xevent.ClientMessageFun(
+			func(X *xgbutil.XUtil, ev xevent.ClientMessageEvent) {
+				g, err := parent.Geometry()
+				if err != nil {
+					panic(err)
+				}
 
-	if err := xproto.ReparentWindowChecked(
-		x, w.Id, parent.Id, 0, 0,
-	).Check(); err != nil {
-		panic(err)
-	}
+				parent.Geom = g
 
-	child = w
+				child.Resize(g.Width(), g.Height())
+			},
+		).Connect(xutil, parent.Id)
+	*/
+}
 
-	// Listen to resizes on the parent
-	parent.Listen(xproto.EventMaskSubstructureRedirect)
-
-	// Callback to resize events
-	xevent.ClientMessageFun(
-		func(X *xgbutil.XUtil, ev xevent.ClientMessageEvent) {
-			g, err := parent.Geometry()
-			if err != nil {
-				panic(err)
-			}
-
-			parent.Geom = g
-
-			child.Resize(g.Width(), g.Height())
-		},
-	).Connect(xutil, parent.Id)
+// Close frees things
+func Close() {
+	x.Close()
 }

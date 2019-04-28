@@ -4,48 +4,51 @@ import (
 	"image"
 
 	"github.com/BurntSushi/xgbutil/xgraphics"
+	"github.com/BurntSushi/xgbutil/xwindow"
 )
 
 // Image is the structure for the image
 type Image struct {
 	*xgraphics.Image
-	X, Y int
+	win *xwindow.Window
 }
 
 // NewImage makes a new image
-func NewImage(i image.Image, X, Y int) *Image {
+func NewImage(img image.Image, X, Y int) *Image {
+	bounds := img.Bounds()
+
 	// Make a new Image
-	img := &Image{
-		Image: xgraphics.NewConvert(xutil, i),
-		X:     X,
-		Y:     Y,
+	i := &Image{
+		Image: xgraphics.NewConvert(xutil, img),
+		win: newChildWindow(
+			X, Y,
+			bounds.Dx(),
+			bounds.Dy(),
+		),
 	}
 
-	img.Show()
+	i.XSurfaceSet(i.win.Id)
+	i.XDraw()
+	i.XPaint(i.win.Id)
 
-	return img
+	i.Show()
+
+	return i
 }
 
 // Show shows the image
 func (i *Image) Show() {
-	i.XSurfaceSet(child.Id)
-	i.XDraw()
-	i.XPaint(child.Id)
-
-	child.Map()
-
-	/*
-		// Generate theh pixmap
-		if err := i.image.CreatePixmap(); err != nil {
-			panic(err)
-		}
-
-		// Draw the image onto the child window
-		i.image.XExpPaint(child.Id, i.X, i.Y)
-	*/
+	i.win.Map()
 }
 
-// Clear destroys the image
+// Clear clears the image
 func (i *Image) Clear() {
+	i.win.Unmap()
+}
+
+// Destroy destroys the image and window, freeing up
+// resources
+func (i *Image) Destroy() {
 	i.Destroy()
+	i.win.Destroy()
 }

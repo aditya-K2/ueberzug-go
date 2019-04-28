@@ -11,16 +11,36 @@ import (
 )
 
 func TestImage(t *testing.T) {
-	r, err := http.Get("https://golang.org/doc/gopher/pencil/gophermega.jpg")
+	img1, err := getImage("https://golang.org/doc/gopher/pencil/gophermega.jpg")
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	i := NewImage(img1, 0, 0)
+	defer i.Clear()
+
+	img2, err := getImage("https://golang.org/doc/gopher/pencil/gophermega.jpg")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	j := NewImage(img2, 50, 75)
+	defer j.Clear()
+
+	time.Sleep(5 * time.Second)
+}
+
+func getImage(url string) (image.Image, error) {
+	r, err := http.Get(url)
+	if err != nil {
+		return nil, err
 	}
 
 	defer r.Body.Close()
 
 	img, _, err := image.Decode(r.Body)
 	if err != nil {
-		t.Fatal(err)
+		return nil, err
 	}
 
 	img = resize.Thumbnail(
@@ -29,8 +49,5 @@ func TestImage(t *testing.T) {
 		resize.Bilinear,
 	)
 
-	i := NewImage(img, 10, 10)
-	defer i.Clear()
-
-	time.Sleep(5 * time.Second)
+	return img, nil
 }

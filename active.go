@@ -11,7 +11,7 @@ const (
 
 func mustGetActiveWindowAtom() xproto.Atom {
 	c := xproto.InternAtom(
-		X, true,
+		x, true,
 		uint16(len(atomActiveWindow)),
 		atomActiveWindow,
 	)
@@ -27,7 +27,7 @@ func mustGetActiveWindowAtom() xproto.Atom {
 func mustGetActiveWindow(root xproto.Window) xproto.Window {
 	// https://github.com/BurntSushi/xgb/blob/master/examples/get-active-window/main.go#L44
 	c := xproto.GetProperty(
-		X, false,
+		x, false,
 		root, mustGetActiveWindowAtom(),
 		xproto.GetPropertyTypeAny,
 		0, (1<<32)-1,
