@@ -3,7 +3,10 @@ package ueberzug
 import (
 	"image"
 	_ "image/jpeg"
+	"io"
 	"net/http"
+	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -18,27 +21,44 @@ func TestImage(t *testing.T) {
 
 	i := NewImage(img1, 0, 0)
 	defer i.Clear()
+	defer i.Destroy()
 
-	img2, err := getImage("https://golang.org/doc/gopher/pencil/gophermega.jpg")
+	img2, err := getImage("_testdata/thonk.png")
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	j := NewImage(img2, 50, 75)
 	defer j.Clear()
+	defer j.Destroy()
 
 	time.Sleep(5 * time.Second)
 }
 
 func getImage(url string) (image.Image, error) {
-	r, err := http.Get(url)
-	if err != nil {
-		return nil, err
+	var reader io.Reader
+
+	if strings.HasPrefix(url, "http") {
+		r, err := http.Get(url)
+		if err != nil {
+			return nil, err
+		}
+
+		defer r.Body.Close()
+
+		reader = r.Body
+	} else {
+		f, err := os.Open(url)
+		if err != nil {
+			return nil, err
+		}
+
+		defer f.Close()
+
+		reader = f
 	}
 
-	defer r.Body.Close()
-
-	img, _, err := image.Decode(r.Body)
+	img, _, err := image.Decode(reader)
 	if err != nil {
 		return nil, err
 	}

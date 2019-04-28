@@ -9,7 +9,7 @@ import (
 
 // Image is the structure for the image
 type Image struct {
-	*xgraphics.Image
+	img *xgraphics.Image
 	win *xwindow.Window
 }
 
@@ -19,7 +19,7 @@ func NewImage(img image.Image, X, Y int) *Image {
 
 	// Make a new Image
 	i := &Image{
-		Image: xgraphics.NewConvert(xutil, img),
+		img: xgraphics.NewConvert(xutil, img),
 		win: newChildWindow(
 			X, Y,
 			bounds.Dx(),
@@ -27,9 +27,9 @@ func NewImage(img image.Image, X, Y int) *Image {
 		),
 	}
 
-	i.XSurfaceSet(i.win.Id)
-	i.XDraw()
-	i.XPaint(i.win.Id)
+	i.img.XSurfaceSet(i.win.Id)
+	i.img.XDraw()
+	i.img.XPaint(i.win.Id)
 
 	i.Show()
 
@@ -49,6 +49,7 @@ func (i *Image) Clear() {
 // Destroy destroys the image and window, freeing up
 // resources
 func (i *Image) Destroy() {
-	i.Destroy()
+	i.Clear()
+	i.img.Destroy()
 	i.win.Destroy()
 }
