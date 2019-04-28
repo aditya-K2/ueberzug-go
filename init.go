@@ -1,12 +1,13 @@
 package ueberzug
 
 import (
+	"time"
+
 	"github.com/BurntSushi/xgb"
 	"github.com/BurntSushi/xgb/xproto"
 	"github.com/BurntSushi/xgbutil"
 	"github.com/BurntSushi/xgbutil/xevent"
 	"github.com/BurntSushi/xgbutil/xwindow"
-	"github.com/k0kubun/pp"
 )
 
 var (
@@ -19,12 +20,14 @@ var (
 )
 
 func init() {
-	x, err := xgb.NewConn()
+	x, err := xgb.NewConnDisplay(":0")
 	if err != nil {
 		panic(err)
 	}
 
 	X = x
+
+	x.Sync()
 
 	xgb, err := xgbutil.NewConnXgb(x)
 	if err != nil {
@@ -44,27 +47,21 @@ func init() {
 
 	parent.Geometry()
 
-	g, err := xwindow.Generate(xutil)
+	g, err := xwindow.Create(xutil, xgb.RootWin())
 	if err != nil {
-		panic(err)
-	}
-
-	if err := g.CreateChecked(parent.Id, 0, 0, 1, 1, 0); err != nil {
-		pp.Print(err)
 		panic(err)
 	}
 
 	child = g
 	child.Create(
 		child.Id,
-		parent.Geom.X(),
-		parent.Geom.Y(),
-		parent.Geom.Width(),
-		parent.Geom.Height(),
+		0, 0, 200, 200,
 		xproto.CwBackPixel, 0xffffff,
 	)
 
 	child.Map()
+
+	time.Sleep(8 * time.Second)
 
 	// Listen to resizes on the parent
 	parent.Listen(xproto.EventMaskSubstructureRedirect)
