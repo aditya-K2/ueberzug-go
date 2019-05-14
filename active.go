@@ -9,26 +9,22 @@ const (
 	atomActiveWindow = "_NET_ACTIVE_WINDOW"
 )
 
-func mustGetActiveWindowAtom() xproto.Atom {
-	c := xproto.InternAtom(
+func getActiveWindow(root xproto.Window) (xproto.Window, error) {
+	i := xproto.InternAtom(
 		x, true,
 		uint16(len(atomActiveWindow)),
 		atomActiveWindow,
 	)
 
-	a, err := c.Reply()
+	a, err := i.Reply()
 	if err != nil {
-		panic(err)
+		return 0, err
 	}
 
-	return a.Atom
-}
-
-func mustGetActiveWindow(root xproto.Window) xproto.Window {
 	// https://github.com/BurntSushi/xgb/blob/master/examples/get-active-window/main.go#L44
 	c := xproto.GetProperty(
 		x, false,
-		root, mustGetActiveWindowAtom(),
+		root, a.Atom,
 		xproto.GetPropertyTypeAny,
 		0, (1<<32)-1,
 	)
@@ -38,5 +34,5 @@ func mustGetActiveWindow(root xproto.Window) xproto.Window {
 		panic(err)
 	}
 
-	return xproto.Window(xgb.Get32(r.Value))
+	return xproto.Window(xgb.Get32(r.Value)), nil
 }

@@ -19,7 +19,13 @@ func TestImage(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	i := NewImage(img1, 0, 0)
+	println("Displaying img1")
+
+	i, err := NewImage(img1, 0, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	defer i.Clear()
 	defer i.Destroy()
 
@@ -28,7 +34,13 @@ func TestImage(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	j := NewImage(img2, 50, 75)
+	println("Displaying img2")
+
+	j, err := NewImage(img2, 50, 75)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	defer j.Clear()
 	defer j.Destroy()
 
