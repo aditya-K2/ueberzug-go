@@ -15,6 +15,10 @@ var (
 
 // Initialize initalizes an X connection
 func Initialize() error {
+	if x != nil {
+		return nil
+	}
+
 	c, err := xgb.NewConn()
 	if err != nil {
 		return err
