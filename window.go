@@ -14,15 +14,15 @@ func newParentWindow() *xwindow.Window {
 	return w
 }
 
-func newChildWindow(X, Y, width, height int) *xwindow.Window {
+func newChildWindow(X, Y, width, height int) (*xwindow.Window, error) {
 	w, err := xwindow.Generate(xutil)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	// Create the window at the root level, we'll
 	// tell X to re-parent it later
-	_panic(w.CreateChecked(
+	if err := w.CreateChecked(
 		xutil.RootWin(),
 		X, Y, width, height,
 
@@ -30,21 +30,17 @@ func newChildWindow(X, Y, width, height int) *xwindow.Window {
 		// touch the window, including overriding
 		// the parent
 		xproto.CwOverrideRedirect, 1,
-	))
+	); err != nil {
+		return nil, err
+	}
 
 	// This reparents the child window to its proper
 	// parent, which is the terminal
-	_panic(xproto.ReparentWindowChecked(
+	if err := xproto.ReparentWindowChecked(
 		x, w.Id, parent.Id, int16(X), int16(Y),
-	).Check())
-
-	return w
-}
-
-func _panic(err error) {
-	if err != nil {
-		x.Close()
-
-		panic(err)
+	).Check(); err != nil {
+		return nil, err
 	}
+
+	return w, nil
 }

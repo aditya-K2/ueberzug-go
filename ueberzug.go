@@ -13,27 +13,46 @@ type Image struct {
 	win *xwindow.Window
 }
 
-// NewImage makes a new image
-func NewImage(img image.Image, X, Y int) *Image {
+// NewImage makes a new image. This also initializes X if
+// it's not initialized.
+func NewImage(img image.Image, X, Y int) (*Image, error) {
+	if x == nil {
+		if err := Initialize(); err != nil {
+			return nil, err
+		}
+	}
+
 	bounds := img.Bounds()
+
+	w, err := newChildWindow(
+		X, Y,
+		bounds.Dx(),
+		bounds.Dy(),
+	)
+
+	if err != nil {
+		return nil, err
+	}
 
 	// Make a new Image
 	i := &Image{
 		img: xgraphics.NewConvert(xutil, img),
-		win: newChildWindow(
-			X, Y,
-			bounds.Dx(),
-			bounds.Dy(),
-		),
+		win: w,
 	}
 
-	i.img.XSurfaceSet(i.win.Id)
-	i.img.XDraw()
+	if err := i.img.XSurfaceSet(i.win.Id); err != nil {
+		return nil, err
+	}
+
+	if err := i.img.XDrawChecked(); err != nil {
+		return nil, err
+	}
+
 	i.img.XPaint(i.win.Id)
 
 	i.Show()
 
-	return i
+	return i, nil
 }
 
 // Show shows the image

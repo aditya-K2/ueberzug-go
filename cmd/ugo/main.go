@@ -38,10 +38,14 @@ func main() {
 		)
 	}
 
-	ui := ueberzug.NewImage(img, x, y)
-	ui.Show()
+	i, err := ueberzug.NewImage(img, x, y)
+	if err != nil {
+		log.Fatalln(err)
+	}
 
-	defer ui.Destroy()
+	i.Show()
+
+	defer i.Destroy()
 
 	select {}
 }

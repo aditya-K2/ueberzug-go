@@ -13,10 +13,15 @@ var (
 	parent *xwindow.Window
 )
 
-func init() {
+// Initialize initalizes an X connection
+func Initialize() error {
+	if x != nil {
+		return nil
+	}
+
 	c, err := xgb.NewConn()
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	x = c
@@ -33,10 +38,15 @@ func init() {
 	setup := xproto.Setup(x)
 	root := setup.DefaultScreen(x).Root
 
+	active, err := getActiveWindow(root)
+	if err != nil {
+		return err
+	}
+
 	// Getting the terminal parent window on startup
 	// is more reliable than getting it on-demand
 	parent = xwindow.New(
-		xgb, mustGetActiveWindow(root),
+		xgb, active,
 	)
 
 	/*
@@ -59,6 +69,8 @@ func init() {
 			},
 		).Connect(xutil, parent.Id)
 	*/
+
+	return nil
 }
 
 // Close frees things
