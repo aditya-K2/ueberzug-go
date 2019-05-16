@@ -1,6 +1,8 @@
 package ueberzug
 
 import (
+	"errors"
+
 	"github.com/BurntSushi/xgb"
 	"github.com/BurntSushi/xgb/xproto"
 	"github.com/BurntSushi/xgbutil"
@@ -71,6 +73,27 @@ func Initialize() error {
 	*/
 
 	return nil
+}
+
+// GetParentSize returns the size of the parent window, which
+// is the terminal.
+func GetParentSize() (int, int, error) {
+	if x == nil {
+		if err := Initialize(); err != nil {
+			return -1, -1, err
+		}
+	}
+
+	if parent == nil {
+		return -1, -1, errors.New("can't find parent in X")
+	}
+
+	r, err := parent.Geometry()
+	if err != nil {
+		return -1, -1, err
+	}
+
+	return r.Width(), r.Height(), nil
 }
 
 // Close frees things
