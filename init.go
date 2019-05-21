@@ -98,5 +98,7 @@ func GetParentSize() (int, int, error) {
 
 // Close frees things
 func Close() {
-	x.Close()
+	if x != nil {
+		x.Close()
+	}
 }
